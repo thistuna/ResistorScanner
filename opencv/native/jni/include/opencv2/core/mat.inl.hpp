@@ -54,21 +54,6 @@
 #pragma warning( disable: 4127 )
 #endif
 
-#if defined(CV_SKIP_DISABLE_CLANG_ENUM_WARNINGS)
-  // nothing
-#elif defined(CV_FORCE_DISABLE_CLANG_ENUM_WARNINGS)
-  #define CV_DISABLE_CLANG_ENUM_WARNINGS
-#elif defined(__clang__) && defined(__has_warning)
-  #if __has_warning("-Wdeprecated-enum-enum-conversion") && __has_warning("-Wdeprecated-anon-enum-enum-conversion")
-    #define CV_DISABLE_CLANG_ENUM_WARNINGS
-  #endif
-#endif
-#ifdef CV_DISABLE_CLANG_ENUM_WARNINGS
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-enum-enum-conversion"
-#pragma clang diagnostic ignored "-Wdeprecated-anon-enum-enum-conversion"
-#endif
-
 namespace cv
 {
 CV__DEBUG_NS_BEGIN
@@ -1269,8 +1254,6 @@ const _Tp& Mat::at(const Vec<int, n>& idx) const
 template<typename _Tp> inline
 MatConstIterator_<_Tp> Mat::begin() const
 {
-    if (empty())
-        return MatConstIterator_<_Tp>();
     CV_DbgAssert( elemSize() == sizeof(_Tp) );
     return MatConstIterator_<_Tp>((const Mat_<_Tp>*)this);
 }
@@ -1278,8 +1261,6 @@ MatConstIterator_<_Tp> Mat::begin() const
 template<typename _Tp> inline
 MatConstIterator_<_Tp> Mat::end() const
 {
-    if (empty())
-        return MatConstIterator_<_Tp>();
     CV_DbgAssert( elemSize() == sizeof(_Tp) );
     MatConstIterator_<_Tp> it((const Mat_<_Tp>*)this);
     it += total();
@@ -1289,8 +1270,6 @@ MatConstIterator_<_Tp> Mat::end() const
 template<typename _Tp> inline
 MatIterator_<_Tp> Mat::begin()
 {
-    if (empty())
-        return MatIterator_<_Tp>();
     CV_DbgAssert( elemSize() == sizeof(_Tp) );
     return MatIterator_<_Tp>((Mat_<_Tp>*)this);
 }
@@ -1298,8 +1277,6 @@ MatIterator_<_Tp> Mat::begin()
 template<typename _Tp> inline
 MatIterator_<_Tp> Mat::end()
 {
-    if (empty())
-        return MatIterator_<_Tp>();
     CV_DbgAssert( elemSize() == sizeof(_Tp) );
     MatIterator_<_Tp> it((Mat_<_Tp>*)this);
     it += total();
@@ -1722,11 +1699,6 @@ Mat_<_Tp>::Mat_(const std::array<_Tp, _Nm>& arr, bool copyData)
 template<typename _Tp> inline
 Mat_<_Tp>& Mat_<_Tp>::operator = (const Mat& m)
 {
-    if (m.empty())
-    {
-        release();
-        return *this;
-    }
     if( traits::Type<_Tp>::value == m.type() )
     {
         Mat::operator = (m);
@@ -1792,7 +1764,7 @@ Mat_<_Tp> Mat_<_Tp>::cross(const Mat_& m) const
 template<typename _Tp> template<typename T2> inline
 Mat_<_Tp>::operator Mat_<T2>() const
 {
-    return Mat_<T2>(static_cast<const Mat&>(*this));
+    return Mat_<T2>(*this);
 }
 
 template<typename _Tp> inline
@@ -2082,7 +2054,7 @@ void Mat_<_Tp>::forEach(const Functor& operation) const {
 
 template<typename _Tp> inline
 Mat_<_Tp>::Mat_(Mat_&& m)
-    : Mat(std::move(m))
+    : Mat(m)
 {
 }
 
@@ -2098,17 +2070,12 @@ Mat_<_Tp>::Mat_(Mat&& m)
     : Mat()
 {
     flags = (flags & ~CV_MAT_TYPE_MASK) + traits::Type<_Tp>::value;
-    *this = std::move(m);
+    *this = m;
 }
 
 template<typename _Tp> inline
 Mat_<_Tp>& Mat_<_Tp>::operator = (Mat&& m)
 {
-    if (m.empty())
-    {
-        release();
-        return *this;
-    }
     if( traits::Type<_Tp>::value == m.type() )
     {
         Mat::operator = ((Mat&&)m);
@@ -2648,7 +2615,6 @@ MatConstIterator::MatConstIterator(const Mat* _m)
 {
     if( m && m->isContinuous() )
     {
-        CV_Assert(!m->empty());
         sliceStart = m->ptr();
         sliceEnd = sliceStart + m->total()*elemSize;
     }
@@ -2662,7 +2628,6 @@ MatConstIterator::MatConstIterator(const Mat* _m, int _row, int _col)
     CV_Assert(m && m->dims <= 2);
     if( m->isContinuous() )
     {
-        CV_Assert(!m->empty());
         sliceStart = m->ptr();
         sliceEnd = sliceStart + m->total()*elemSize;
     }
@@ -2677,7 +2642,6 @@ MatConstIterator::MatConstIterator(const Mat* _m, Point _pt)
     CV_Assert(m && m->dims <= 2);
     if( m->isContinuous() )
     {
-        CV_Assert(!m->empty());
         sliceStart = m->ptr();
         sliceEnd = sliceStart + m->total()*elemSize;
     }
@@ -4004,11 +3968,6 @@ inline void UMatData::markDeviceCopyObsolete(bool flag)
 
 #ifdef _MSC_VER
 #pragma warning( pop )
-#endif
-
-#ifdef CV_DISABLE_CLANG_ENUM_WARNINGS
-#undef CV_DISABLE_CLANG_ENUM_WARNINGS
-#pragma clang diagnostic pop
 #endif
 
 #endif

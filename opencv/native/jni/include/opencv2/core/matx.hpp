@@ -385,10 +385,6 @@ public:
     const _Tp& operator ()(int i) const;
     _Tp& operator ()(int i);
 
-#ifdef CV_CXX11
-    Vec<_Tp, cn>& operator=(const Vec<_Tp, cn>& rhs) = default;
-#endif
-
     Vec(const Matx<_Tp, cn, 1>& a, const Matx<_Tp, cn, 1>& b, Matx_AddOp);
     Vec(const Matx<_Tp, cn, 1>& a, const Matx<_Tp, cn, 1>& b, Matx_SubOp);
     template<typename _T2> Vec(const Matx<_Tp, cn, 1>& a, _T2 alpha, Matx_ScaleOp);
@@ -1267,34 +1263,6 @@ template<typename _Tp, int m, int n> static inline
 Matx<_Tp, m, n> operator * (double alpha, const Matx<_Tp, m, n>& a)
 {
     return Matx<_Tp, m, n>(a, alpha, Matx_ScaleOp());
-}
-
-template<typename _Tp, int m, int n> static inline
-Matx<_Tp, m, n>& operator /= (Matx<_Tp, m, n>& a, float alpha)
-{
-    for( int i = 0; i < m*n; i++ )
-        a.val[i] = a.val[i] / alpha;
-    return a;
-}
-
-template<typename _Tp, int m, int n> static inline
-Matx<_Tp, m, n>& operator /= (Matx<_Tp, m, n>& a, double alpha)
-{
-    for( int i = 0; i < m*n; i++ )
-        a.val[i] = a.val[i] / alpha;
-    return a;
-}
-
-template<typename _Tp, int m, int n> static inline
-Matx<_Tp, m, n> operator / (const Matx<_Tp, m, n>& a, float alpha)
-{
-    return Matx<_Tp, m, n>(a, 1.f/alpha, Matx_ScaleOp());
-}
-
-template<typename _Tp, int m, int n> static inline
-Matx<_Tp, m, n> operator / (const Matx<_Tp, m, n>& a, double alpha)
-{
-    return Matx<_Tp, m, n>(a, 1./alpha, Matx_ScaleOp());
 }
 
 template<typename _Tp, int m, int n> static inline

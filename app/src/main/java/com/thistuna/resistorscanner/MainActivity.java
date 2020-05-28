@@ -18,7 +18,6 @@ import org.opencv.core.Mat;
 
 public class MainActivity extends AppCompatActivity implements CvCameraViewListener {
     private CameraBridgeViewBase m_cameraView;
-    private Mat mOutputFrame;
 
     static {
         System.loadLibrary("opencv_java4");
@@ -54,12 +53,12 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-        mOutputFrame = new Mat(height, width, CvType.CV_8UC1);
+
     }
 
     @Override
     public void onCameraViewStopped() {
-        mOutputFrame.release();
+
     }
 
     @Override
@@ -68,6 +67,6 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         // 試しに、ネガポジ反転してみる
         Core.bitwise_not(inputFrame, inputFrame);
 
-        return mOutputFrame;
+        return inputFrame;
     }
 }
