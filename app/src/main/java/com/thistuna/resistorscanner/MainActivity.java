@@ -68,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 //        Core.bitwise_not(inputFrame, inputFrame);
         Mat rot = new Mat();
 
+        Core.rotate(inputFrame, rot, Core.ROTATE_90_CLOCKWISE);
+
         return rot;
     }
 }

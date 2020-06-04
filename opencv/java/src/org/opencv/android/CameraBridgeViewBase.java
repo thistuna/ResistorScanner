@@ -397,6 +397,21 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         boolean bmpValid = true;
         if (modified != null) {
             try {
+                //add :mat AutoFIt :Start
+                // http://sankusu2525.hatenablog.com/entry/2018/01/13/225625
+                if(modified.cols() != mCacheBitmap.getWidth() || modified.rows() != mCacheBitmap.getHeight()){
+                    Log.d(TAG, " mCacheBitmap.getWidth():" +mCacheBitmap.getWidth() +" mCacheBitmap.getHeight():" +mCacheBitmap.getHeight());
+                    mCacheBitmap = Bitmap.createBitmap(modified.cols(), modified.rows(), Bitmap.Config.ARGB_8888);
+                    float scaleHeight = (float) mFrameHeight/ (float) modified.rows() ;
+                    float scaleWidth = (float) mFrameWidth / (float) modified.cols();
+                    mScale = scaleWidth > scaleHeight ? scaleWidth: scaleHeight;
+                    Log.d(TAG, " mScale:" +mScale +" scaleWidth:" +scaleWidth
+                            +" scaleHeight:" +scaleHeight
+                            +" mMaxWidth:" +mMaxWidth +" mMaxHeight:" +mMaxHeight
+                            +" mFrameWidth:" +mFrameWidth +" mFrameHeight:" +mFrameHeight
+                            +" modified.cols():" +modified.cols() +" modified.rows():" +modified.rows());
+                }
+                //add :mat AutoFIt :End
                 Utils.matToBitmap(modified, mCacheBitmap);
             } catch(Exception e) {
                 Log.e(TAG, "Mat type: " + modified);
