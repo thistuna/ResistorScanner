@@ -30,7 +30,7 @@ import android.view.SurfaceView;
 public abstract class CameraBridgeViewBase extends SurfaceView implements SurfaceHolder.Callback {
 
     private static final String TAG = "CameraBridge";
-    protected static final int MAX_UNSPECIFIED = -1;
+    private static final int MAX_UNSPECIFIED = -1;
     private static final int STOPPED = 0;
     private static final int STARTED = 1;
 
@@ -48,7 +48,6 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     protected int mPreviewFormat = RGBA;
     protected int mCameraIndex = CAMERA_ID_ANY;
     protected boolean mEnabled;
-    protected boolean mCameraPermissionGranted = false;
     protected FpsMeter mFpsMeter = null;
 
     public static final int CAMERA_ID_ANY   = -1;
@@ -220,24 +219,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         }
     }
 
-
-    /**
-     * This method is provided for clients, so they can signal camera permission has been granted.
-     * The actual onCameraViewStarted callback will be delivered only after setCameraPermissionGranted
-     * and enableView have been called and surface is available
-     */
-    public void setCameraPermissionGranted() {
-        synchronized(mSyncObject) {
-            mCameraPermissionGranted = true;
-            checkCurrentState();
-        }
-    }
-
-
     /**
      * This method is provided for clients, so they can enable the camera connection.
-     * The actual onCameraViewStarted callback will be delivered only after setCameraPermissionGranted
-     * and enableView have been called and surface is available
+     * The actual onCameraViewStarted callback will be delivered only after both this method is called and surface is available
      */
     public void enableView() {
         synchronized(mSyncObject) {
@@ -248,7 +232,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
 
     /**
      * This method is provided for clients, so they can disable camera connection and stop
-     * the delivery of frames even though the surface view itself is not destroyed and still stays on the screen
+     * the delivery of frames even though the surface view itself is not destroyed and still stays on the scren
      */
     public void disableView() {
         synchronized(mSyncObject) {
@@ -316,7 +300,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         Log.d(TAG, "call checkCurrentState");
         int targetState;
 
-        if (mEnabled && mCameraPermissionGranted && mSurfaceExist && getVisibility() == VISIBLE) {
+        if (mEnabled && mSurfaceExist && getVisibility() == VISIBLE) {
             targetState = STARTED;
         } else {
             targetState = STOPPED;
@@ -413,6 +397,21 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         boolean bmpValid = true;
         if (modified != null) {
             try {
+                //add :mat AutoFIt :Start
+                // http://sankusu2525.hatenablog.com/entry/2018/01/13/225625
+                if(modified.cols() != mCacheBitmap.getWidth() || modified.rows() != mCacheBitmap.getHeight()){
+                    Log.d(TAG, " mCacheBitmap.getWidth():" +mCacheBitmap.getWidth() +" mCacheBitmap.getHeight():" +mCacheBitmap.getHeight());
+                    mCacheBitmap = Bitmap.createBitmap(modified.cols(), modified.rows(), Bitmap.Config.ARGB_8888);
+                    float scaleHeight = (float) mFrameHeight/ (float) modified.rows() ;
+                    float scaleWidth = (float) mFrameWidth / (float) modified.cols();
+                    mScale = scaleWidth > scaleHeight ? scaleWidth: scaleHeight;
+                    Log.d(TAG, " mScale:" +mScale +" scaleWidth:" +scaleWidth
+                            +" scaleHeight:" +scaleHeight
+                            +" mMaxWidth:" +mMaxWidth +" mMaxHeight:" +mMaxHeight
+                            +" mFrameWidth:" +mFrameWidth +" mFrameHeight:" +mFrameHeight
+                            +" modified.cols():" +modified.cols() +" modified.rows():" +modified.rows());
+                }
+                //add :mat AutoFIt :End
                 Utils.matToBitmap(modified, mCacheBitmap);
             } catch(Exception e) {
                 Log.e(TAG, "Mat type: " + modified);
@@ -497,7 +496,6 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         for (Object size : supportedSizes) {
             int width = accessor.getWidth(size);
             int height = accessor.getHeight(size);
-            Log.d(TAG, "trying size: " + width + "x" + height);
 
             if (width <= maxAllowedWidth && height <= maxAllowedHeight) {
                 if (width >= calcWidth && height >= calcHeight) {
@@ -505,13 +503,6 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
                     calcHeight = (int) height;
                 }
             }
-        }
-        if ((calcWidth == 0 || calcHeight == 0) && supportedSizes.size() > 0)
-        {
-            Log.i(TAG, "fallback to the first frame size");
-            Object size = supportedSizes.get(0);
-            calcWidth = accessor.getWidth(size);
-            calcHeight = accessor.getHeight(size);
         }
 
         return new Size(calcWidth, calcHeight);

@@ -107,38 +107,38 @@ the index is built.
 `Distance` functor specifies the metric to be used to calculate the distance between two points.
 There are several `Distance` functors that are readily available:
 
-cv::cvflann::L2_Simple - Squared Euclidean distance functor.
+@link cvflann::L2_Simple cv::flann::L2_Simple @endlink- Squared Euclidean distance functor.
 This is the simpler, unrolled version. This is preferable for very low dimensionality data (eg 3D points)
 
-cv::flann::L2 - Squared Euclidean distance functor, optimized version.
+@link cvflann::L2 cv::flann::L2 @endlink- Squared Euclidean distance functor, optimized version.
 
-cv::flann::L1 - Manhattan distance functor, optimized version.
+@link cvflann::L1 cv::flann::L1 @endlink - Manhattan distance functor, optimized version.
 
-cv::flann::MinkowskiDistance -  The Minkowsky distance functor.
+@link cvflann::MinkowskiDistance cv::flann::MinkowskiDistance @endlink -  The Minkowsky distance functor.
 This is highly optimised with loop unrolling.
 The computation of squared root at the end is omitted for efficiency.
 
-cv::flann::MaxDistance - The max distance functor. It computes the
+@link cvflann::MaxDistance cv::flann::MaxDistance @endlink - The max distance functor. It computes the
 maximum distance between two vectors. This distance is not a valid kdtree distance, it's not
 dimensionwise additive.
 
-cv::flann::HammingLUT -  %Hamming distance functor. It counts the bit
+@link cvflann::HammingLUT cv::flann::HammingLUT @endlink -  %Hamming distance functor. It counts the bit
 differences between two strings using a lookup table implementation.
 
-cv::flann::Hamming - %Hamming distance functor. Population count is
+@link cvflann::Hamming cv::flann::Hamming @endlink - %Hamming distance functor. Population count is
 performed using library calls, if available. Lookup table implementation is used as a fallback.
 
-cv::flann::Hamming2 - %Hamming distance functor. Population count is
+@link cvflann::Hamming2 cv::flann::Hamming2 @endlink- %Hamming distance functor. Population count is
 implemented in 12 arithmetic operations (one of which is multiplication).
 
-cv::flann::HistIntersectionDistance - The histogram
+@link cvflann::HistIntersectionDistance cv::flann::HistIntersectionDistance @endlink - The histogram
 intersection distance functor.
 
-cv::flann::HellingerDistance - The Hellinger distance functor.
+@link cvflann::HellingerDistance cv::flann::HellingerDistance @endlink - The Hellinger distance functor.
 
-cv::flann::ChiSquareDistance - The chi-square distance functor.
+@link cvflann::ChiSquareDistance cv::flann::ChiSquareDistance @endlink - The chi-square distance functor.
 
-cv::flann::KL_Divergence - The Kullback-Leibler divergence functor.
+@link cvflann::KL_Divergence cv::flann::KL_Divergence @endlink - The Kullback-Leibler divergence functor.
 
 Although the provided implementations cover a vast range of cases, it is also possible to use
 a custom implementation. The distance functor is a class whose `operator()` computes the distance
@@ -289,7 +289,7 @@ public:
 
         int veclen() const { return nnIndex->veclen(); }
 
-        int size() const { return (int)nnIndex->size(); }
+        int size() const { return nnIndex->size(); }
 
         ::cvflann::IndexParams getParameters() { return nnIndex->getParameters(); }
 
@@ -297,7 +297,6 @@ public:
 
 private:
         ::cvflann::Index<Distance>* nnIndex;
-        Mat _dataset;
 };
 
 //! @cond IGNORED
@@ -313,11 +312,10 @@ private:
 
 template <typename Distance>
 GenericIndex<Distance>::GenericIndex(const Mat& dataset, const ::cvflann::IndexParams& params, Distance distance)
-: _dataset(dataset)
 {
     CV_Assert(dataset.type() == CvType<ElementType>::type());
     CV_Assert(dataset.isContinuous());
-    ::cvflann::Matrix<ElementType> m_dataset((ElementType*)_dataset.ptr<ElementType>(0), _dataset.rows, _dataset.cols);
+    ::cvflann::Matrix<ElementType> m_dataset((ElementType*)dataset.ptr<ElementType>(0), dataset.rows, dataset.cols);
 
     nnIndex = new ::cvflann::Index<Distance>(m_dataset, params, distance);
 
@@ -396,6 +394,8 @@ int GenericIndex<Distance>::radiusSearch(const Mat& query, Mat& indices, Mat& di
 
     return nnIndex->radiusSearch(m_query,m_indices,m_dists,radius,searchParams);
 }
+
+//! @endcond
 
 /**
  * @deprecated Use GenericIndex class instead
@@ -529,7 +529,6 @@ private:
     ::cvflann::Index< L1<ElementType> >* nnIndex_L1;
 };
 
-//! @endcond
 
 /** @brief Clusters features using hierarchical k-means algorithm.
 
@@ -566,8 +565,8 @@ int hierarchicalClustering(const Mat& features, Mat& centers, const ::cvflann::K
     return ::cvflann::hierarchicalClustering<Distance>(m_features, m_centers, params, d);
 }
 
-//! @cond IGNORED
-
+/** @deprecated
+*/
 template <typename ELEM_TYPE, typename DIST_TYPE>
 CV_DEPRECATED int hierarchicalClustering(const Mat& features, Mat& centers, const ::cvflann::KMeansIndexParams& params)
 {
@@ -587,8 +586,6 @@ CV_DEPRECATED int hierarchicalClustering(const Mat& features, Mat& centers, cons
         CV_Assert(0);
     }
 }
-
-//! @endcond
 
 //! @} flann
 
