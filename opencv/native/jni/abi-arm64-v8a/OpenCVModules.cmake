@@ -16,7 +16,7 @@ set(CMAKE_IMPORT_FILE_VERSION 1)
 set(_targetsDefined)
 set(_targetsNotDefined)
 set(_expectedTargets)
-foreach(_expectedTarget libcpufeatures libjpeg-turbo libtiff libwebp libjasper libpng IlmImf tbb libprotobuf quirc tegra_hal ittnotify ade ocv.3rdparty.android_mediandk opencv_core opencv_flann opencv_imgproc opencv_ml opencv_photo opencv_dnn opencv_features2d opencv_gapi opencv_imgcodecs opencv_videoio opencv_calib3d opencv_highgui opencv_objdetect opencv_stitching opencv_video opencv_java)
+foreach(_expectedTarget libcpufeatures libjpeg-turbo libtiff libwebp libjasper libpng IlmImf tbb libprotobuf quirc tegra_hal ocv.3rdparty.android_mediandk opencv_core opencv_flann opencv_imgproc opencv_ml opencv_photo opencv_dnn opencv_imgcodecs opencv_videoio opencv_highgui opencv_features2d opencv_calib3d opencv_objdetect opencv_stitching opencv_video opencv_java)
   list(APPEND _expectedTargets ${_expectedTarget})
   if(NOT TARGET ${_expectedTarget})
     list(APPEND _targetsNotDefined ${_expectedTarget})
@@ -89,7 +89,7 @@ set_target_properties(IlmImf PROPERTIES
 add_library(tbb STATIC IMPORTED)
 
 set_target_properties(tbb PROPERTIES
-  INTERFACE_COMPILE_DEFINITIONS "TBB_USE_GCC_BUILTINS=1;__TBB_GCC_BUILTIN_ATOMICS_PRESENT=1;TBB_SUPPRESS_DEPRECATED_MESSAGES=1"
+  INTERFACE_COMPILE_DEFINITIONS "TBB_USE_GCC_BUILTINS=1;__TBB_GCC_BUILTIN_ATOMICS_PRESENT=1"
   INTERFACE_LINK_LIBRARIES "c;m;dl"
 )
 
@@ -101,16 +101,6 @@ add_library(quirc STATIC IMPORTED)
 
 # Create imported target tegra_hal
 add_library(tegra_hal STATIC IMPORTED)
-
-# Create imported target ittnotify
-add_library(ittnotify STATIC IMPORTED)
-
-set_target_properties(ittnotify PROPERTIES
-  INTERFACE_LINK_LIBRARIES "dl"
-)
-
-# Create imported target ade
-add_library(ade STATIC IMPORTED)
 
 # Create imported target ocv.3rdparty.android_mediandk
 add_library(ocv.3rdparty.android_mediandk INTERFACE IMPORTED)
@@ -126,105 +116,98 @@ set_target_properties(ocv.3rdparty.android_mediandk PROPERTIES
 add_library(opencv_core STATIC IMPORTED)
 
 set_target_properties(opencv_core PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:tbb>;\$<LINK_ONLY:z>;\$<LINK_ONLY:libcpufeatures>;\$<LINK_ONLY:ittnotify>;\$<LINK_ONLY:tegra_hal>"
+  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:tbb>;\$<LINK_ONLY:z>;\$<LINK_ONLY:libcpufeatures>;\$<LINK_ONLY:tegra_hal>"
 )
 
 # Create imported target opencv_flann
 add_library(opencv_flann STATIC IMPORTED)
 
 set_target_properties(opencv_flann PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;opencv_core;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
 )
 
 # Create imported target opencv_imgproc
 add_library(opencv_imgproc STATIC IMPORTED)
 
 set_target_properties(opencv_imgproc PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;opencv_core;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
 )
 
 # Create imported target opencv_ml
 add_library(opencv_ml STATIC IMPORTED)
 
 set_target_properties(opencv_ml PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;opencv_core;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
 )
 
 # Create imported target opencv_photo
 add_library(opencv_photo STATIC IMPORTED)
 
 set_target_properties(opencv_photo PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_imgproc>;opencv_core;opencv_imgproc;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;opencv_imgproc;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
 )
 
 # Create imported target opencv_dnn
 add_library(opencv_dnn STATIC IMPORTED)
 
 set_target_properties(opencv_dnn PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_imgproc>;opencv_core;opencv_imgproc;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:libprotobuf>"
-)
-
-# Create imported target opencv_features2d
-add_library(opencv_features2d STATIC IMPORTED)
-
-set_target_properties(opencv_features2d PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_flann>;\$<LINK_ONLY:opencv_imgproc>;opencv_core;opencv_flann;opencv_imgproc;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
-)
-
-# Create imported target opencv_gapi
-add_library(opencv_gapi STATIC IMPORTED)
-
-set_target_properties(opencv_gapi PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_imgproc>;opencv_core;opencv_imgproc;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:ade>;\$<LINK_ONLY:tbb>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;opencv_imgproc;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:libprotobuf>"
 )
 
 # Create imported target opencv_imgcodecs
 add_library(opencv_imgcodecs STATIC IMPORTED)
 
 set_target_properties(opencv_imgcodecs PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_imgproc>;opencv_core;opencv_imgproc;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:z>;\$<LINK_ONLY:libjpeg-turbo>;\$<LINK_ONLY:libwebp>;\$<LINK_ONLY:libpng>;\$<LINK_ONLY:libtiff>;\$<LINK_ONLY:libjasper>;\$<LINK_ONLY:IlmImf>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;opencv_imgproc;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:z>;\$<LINK_ONLY:libjpeg-turbo>;\$<LINK_ONLY:libwebp>;\$<LINK_ONLY:libpng>;\$<LINK_ONLY:libtiff>;\$<LINK_ONLY:libjasper>;\$<LINK_ONLY:IlmImf>"
 )
 
 # Create imported target opencv_videoio
 add_library(opencv_videoio STATIC IMPORTED)
 
 set_target_properties(opencv_videoio PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_imgproc>;\$<LINK_ONLY:opencv_imgcodecs>;opencv_core;opencv_imgproc;opencv_imgcodecs;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:ocv.3rdparty.android_mediandk>"
-)
-
-# Create imported target opencv_calib3d
-add_library(opencv_calib3d STATIC IMPORTED)
-
-set_target_properties(opencv_calib3d PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_flann>;\$<LINK_ONLY:opencv_imgproc>;\$<LINK_ONLY:opencv_features2d>;opencv_core;opencv_flann;opencv_imgproc;opencv_features2d;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;opencv_imgproc;opencv_imgcodecs;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:ocv.3rdparty.android_mediandk>"
 )
 
 # Create imported target opencv_highgui
 add_library(opencv_highgui STATIC IMPORTED)
 
 set_target_properties(opencv_highgui PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_imgproc>;\$<LINK_ONLY:opencv_imgcodecs>;\$<LINK_ONLY:opencv_videoio>;opencv_core;opencv_imgproc;opencv_imgcodecs;opencv_videoio;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;opencv_imgproc;opencv_imgcodecs;opencv_videoio;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
+)
+
+# Create imported target opencv_features2d
+add_library(opencv_features2d STATIC IMPORTED)
+
+set_target_properties(opencv_features2d PROPERTIES
+  INTERFACE_LINK_LIBRARIES "opencv_core;opencv_flann;opencv_imgproc;opencv_imgcodecs;opencv_videoio;opencv_highgui;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
+)
+
+# Create imported target opencv_calib3d
+add_library(opencv_calib3d STATIC IMPORTED)
+
+set_target_properties(opencv_calib3d PROPERTIES
+  INTERFACE_LINK_LIBRARIES "opencv_core;opencv_flann;opencv_imgproc;opencv_imgcodecs;opencv_videoio;opencv_highgui;opencv_features2d;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
 )
 
 # Create imported target opencv_objdetect
 add_library(opencv_objdetect STATIC IMPORTED)
 
 set_target_properties(opencv_objdetect PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_flann>;\$<LINK_ONLY:opencv_imgproc>;\$<LINK_ONLY:opencv_features2d>;\$<LINK_ONLY:opencv_calib3d>;opencv_core;opencv_flann;opencv_imgproc;opencv_features2d;opencv_calib3d;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:quirc>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;opencv_flann;opencv_imgproc;opencv_imgcodecs;opencv_videoio;opencv_highgui;opencv_features2d;opencv_calib3d;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>;\$<LINK_ONLY:quirc>"
 )
 
 # Create imported target opencv_stitching
 add_library(opencv_stitching STATIC IMPORTED)
 
 set_target_properties(opencv_stitching PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_flann>;\$<LINK_ONLY:opencv_imgproc>;\$<LINK_ONLY:opencv_features2d>;\$<LINK_ONLY:opencv_calib3d>;opencv_core;opencv_flann;opencv_imgproc;opencv_features2d;opencv_calib3d;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;opencv_flann;opencv_imgproc;opencv_imgcodecs;opencv_videoio;opencv_highgui;opencv_features2d;opencv_calib3d;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
 )
 
 # Create imported target opencv_video
 add_library(opencv_video STATIC IMPORTED)
 
 set_target_properties(opencv_video PROPERTIES
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:opencv_core>;\$<LINK_ONLY:opencv_flann>;\$<LINK_ONLY:opencv_imgproc>;\$<LINK_ONLY:opencv_features2d>;\$<LINK_ONLY:opencv_calib3d>;opencv_core;opencv_flann;opencv_imgproc;opencv_features2d;opencv_calib3d;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
+  INTERFACE_LINK_LIBRARIES "opencv_core;opencv_flann;opencv_imgproc;opencv_imgcodecs;opencv_videoio;opencv_highgui;opencv_features2d;opencv_calib3d;\$<LINK_ONLY:dl>;\$<LINK_ONLY:m>;\$<LINK_ONLY:log>;\$<LINK_ONLY:tegra_hal>"
 )
 
 # Create imported target opencv_java

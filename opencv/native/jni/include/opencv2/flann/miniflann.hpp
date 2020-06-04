@@ -43,8 +43,6 @@
 #ifndef OPENCV_MINIFLANN_HPP
 #define OPENCV_MINIFLANN_HPP
 
-//! @cond IGNORED
-
 #include "opencv2/core.hpp"
 #include "opencv2/flann/defines.h"
 
@@ -175,7 +173,5 @@ protected:
 };
 
 } } // namespace cv::flann
-
-//! @endcond
 
 #endif
