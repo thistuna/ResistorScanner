@@ -65,8 +65,9 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     public Mat onCameraFrame(Mat inputFrame) {
         // ここで何らかの画像処理を行う
         // 試しに、ネガポジ反転してみる
-        Core.bitwise_not(inputFrame, inputFrame);
+//        Core.bitwise_not(inputFrame, inputFrame);
+        Mat rot = new Mat();
 
-        return inputFrame;
+        return rot;
     }
 }
