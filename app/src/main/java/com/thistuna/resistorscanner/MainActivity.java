@@ -15,6 +15,10 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+
+import static org.opencv.imgproc.Imgproc.rectangle;
 
 public class MainActivity extends AppCompatActivity implements CvCameraViewListener {
     private CameraBridgeViewBase m_cameraView;
@@ -69,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         Mat rot = new Mat();
 
         Core.rotate(inputFrame, rot, Core.ROTATE_90_CLOCKWISE);
+
+        rectangle(rot, new Point(220,350), new Point(260, 370), new Scalar(255,0,0), 1, 1);
 
         return rot;
     }
