@@ -8,6 +8,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener;
@@ -22,6 +23,7 @@ import static org.opencv.imgproc.Imgproc.rectangle;
 
 public class MainActivity extends AppCompatActivity implements CvCameraViewListener {
     private CameraBridgeViewBase m_cameraView;
+    private TextView textView;
 
     static {
         System.loadLibrary("opencv_java4");
@@ -37,6 +39,10 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         m_cameraView = findViewById(R.id.camera_view);
         m_cameraView.setCvCameraViewListener(this);
         m_cameraView.enableView();
+
+        textView = findViewById(R.id.TextView1);
+
+        textView.setText("赤 赤 黒 茶");
     }
 
     public static boolean getPermissionCamera(Activity activity) {
@@ -75,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         Core.rotate(inputFrame, rot, Core.ROTATE_90_CLOCKWISE);
 
         rectangle(rot, new Point(220,350), new Point(260, 370), new Scalar(255,0,0), 1, 1);
+
+
 
         return rot;
     }
