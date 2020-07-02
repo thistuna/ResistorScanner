@@ -83,8 +83,9 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         return a1 < a2 ? a2 : a1;
     }
 
+    // dstにsrcを貼り付ける
     private void paste(Mat dst, Mat src, int x, int y, int width, int height) {
-        Mat resized_img = null;
+        Mat resized_img = new Mat();
         resize(src, resized_img, new Size(width, height));
 
         if (x >= dst.cols() || y >= dst.rows()) return;
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
     // 画像を画像に貼り付ける関数（サイズ指定を省略したバージョン）
     private void paste(Mat dst, Mat src, int x, int y) {
-        paste(dst, src, x, y, src.rows(), src.cols());
+        paste(dst, src, x, y, src.cols(), src.rows());
     }
 
     @Override
@@ -115,21 +116,22 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         Core.rotate(inputFrame, rot, Core.ROTATE_90_CLOCKWISE);
 
         Rect roi = new Rect(new Point(220, 358), new Size(40, 5));
-        final Mat cutted = rot.submat(roi);
-        cutted.copyTo(cutted);
+        final Mat cuttedPic = new Mat();
+        rot.submat(roi).copyTo(cuttedPic);
 
-        rectangle(rot, new Point(220,350), new Point(260, 370), new Scalar(255,0,0), 1, 1);
-
-        double a[] = cutted.get(0,1);
+        double a[] = cuttedPic.get(0,0);
 
         for(int i=0; i<100; ++i){
             rot.put(100,100+i,a);
         }
 
+        rectangle(rot, new Point(220,350), new Point(260, 370), new Scalar(255,0,0), 1, 1);
+
+        paste(rot, cuttedPic,100,400);
 
         textView.post(new Runnable() {
             public void run() {
-                textView.setText("h:" + cutted.rows() + " r:" + cutted.cols());
+                textView.setText("h:" + cuttedPic.rows() + " r:" + cuttedPic.cols());
             }
         });
 
