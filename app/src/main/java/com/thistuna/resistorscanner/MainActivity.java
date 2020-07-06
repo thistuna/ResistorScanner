@@ -5,6 +5,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -20,7 +21,12 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.core.TermCriteria;
+import org.opencv.imgproc.Imgproc;
 
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2HSV;
+import static org.opencv.imgproc.Imgproc.COLOR_HSV2BGR;
+import static org.opencv.imgproc.Imgproc.cvtColor;
 import static org.opencv.imgproc.Imgproc.rectangle;
 import static org.opencv.imgproc.Imgproc.resize;
 
@@ -45,8 +51,6 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         m_cameraView.enableView();
 
         textView = findViewById(R.id.TextView1);
-
-        textView.setText("赤 赤 黒 茶");
     }
 
     public static boolean getPermissionCamera(Activity activity) {
@@ -119,19 +123,139 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         final Mat cuttedPic = new Mat();
         rot.submat(roi).copyTo(cuttedPic);
 
-        double a[] = cuttedPic.get(0,0);
+//        double a[] = cuttedPic.get(0,0);
+//
+//        for(int i=0; i<100; ++i){
+//            rot.put(100,100+i,a);
+//        }
 
-        for(int i=0; i<100; ++i){
-            rot.put(100,100+i,a);
+        int MAX_CLUSTERS = 5;
+
+        final Mat cuttedHSV = new Mat();
+        final Mat ReCutPic = new Mat();
+
+        Mat points = new Mat();
+        Imgproc.cvtColor(cuttedPic, cuttedHSV, Imgproc.COLOR_RGBA2BGR,3);
+        Imgproc.cvtColor(cuttedHSV, cuttedHSV, Imgproc.COLOR_BGR2HSV, 3);
+
+        cuttedHSV.convertTo(points, CvType.CV_32FC3);
+        int size = points.rows()*points.cols();
+        points = points.reshape(3,size);
+
+        final Mat clusters = new Mat();
+        Mat centers = new Mat();
+        Core.kmeans(points, MAX_CLUSTERS, clusters,
+                new TermCriteria(TermCriteria.EPS+TermCriteria.MAX_ITER, 10, 1.0), 1, Core.KMEANS_PP_CENTERS, centers);
+
+        //Mat color = Mat.zeros(MAX_CLUSTERS, 1, CvType.CV_32FC3);
+        //Mat count = Mat.zeros(MAX_CLUSTERS, 1, CvType.CV_32SC1);
+
+        Mat reshapeClusters = clusters.reshape(1, cuttedHSV.rows());
+
+        int len = -1;
+        int min = 100;
+        int max = -1;
+        int[] count = new int[5];
+        double[] CenterOfGravityX = new double[5];
+        double[] CenterOfGravityY = new double[5];
+        double[] meanH = new double[5];
+        double[] meanS = new double[5];
+        double[] meanV = new double[5];
+        Mat plot = Mat.zeros(cuttedHSV.rows(), cuttedHSV.cols(), CvType.CV_8UC3);
+        for(int i=0; i<plot.rows(); ++i){
+            for(int j=0; j<plot.cols(); ++j){
+                int[] temp = new int[1];
+                byte[] puttemp = new byte[3];
+                len = reshapeClusters.get(i,j).length;
+                reshapeClusters.get(i,j,temp);
+                if(temp[0] > max) max = temp[0];
+                if(temp[0] < min) min = temp[0];
+/*                if(temp[0] == 0) {
+                    puttemp[0] = 0;
+                    puttemp[1] = 0;
+                    puttemp[2] = 0;
+                }
+                if(temp[0] == 1) {
+                    puttemp[0] = (byte)255;
+                    puttemp[1] = 0;
+                    puttemp[2] = 0;
+                }
+                if(temp[0] == 2) {
+                    puttemp[0] = 0;
+                    puttemp[1] = (byte)255;
+                    puttemp[2] = 0;
+                }
+                if(temp[0] == 3) {
+                    puttemp[0] = 0;
+                    puttemp[1] = 0;
+                    puttemp[2] = (byte)255;
+                }
+                if(temp[0] == 4) {
+                    puttemp[0] = (byte)255;
+                    puttemp[1] = (byte)255;
+                    puttemp[2] = (byte)255;
+                }*/
+                for(int k = 0; k<5; ++k){
+                    if(temp[0] == k){
+                        count[k]++;
+                        CenterOfGravityX[k] += j;
+                        CenterOfGravityY[k] += i;
+
+                        byte[] getTempHSV = new byte[3];
+                        cuttedHSV.get(i,j,getTempHSV);
+                        meanH[k] += getTempHSV[0];
+                        meanS[k] += getTempHSV[1];
+                        meanV[k] += getTempHSV[2];
+                    }
+                }
+                //plot.put(i,j,puttemp);
+            }
         }
+        int bg=0;
+        for(int i=0; i<5; ++i){
+            CenterOfGravityX[i] /= count[i];
+            meanH[i] /= count[i];
+            meanS[i] /= count[i];
+            meanV[i] /= count[i];
+            if(count[bg] < count[i]) bg = i;
+        }
+
+        for(int i=0; i<plot.rows(); ++i) {
+            for (int j = 0; j < plot.cols(); ++j) {
+                byte[] puttemp = new byte[3];
+                int[] temp = new int[1];
+                reshapeClusters.get(i,j,temp);
+
+                for(int k = 0; k<5; ++k){
+                    if(temp[0] == k){
+                        puttemp[0] = (byte)meanH[k];
+                        puttemp[1] = (byte)meanS[k];
+                        puttemp[2] = (byte)meanV[k];
+                        plot.put(i,j,puttemp);
+                    }
+                }
+            }
+        }
+                //new Mat(cuttedHSV.rows(), cuttedHSV.cols(), CvType.CV_8UC3);
+        //clusters.convertTo(ReCutPic, CvType.CV_8SC3);
+
+        //Imgproc.cvtColor(ReCutPic, ReCutPic, Imgproc.COLOR_HSV2BGR,3);
+        //Imgproc.cvtColor(ReCutPic, ReCutPic, Imgproc.COLOR_BGR2RGBA,4);
 
         rectangle(rot, new Point(220,350), new Point(260, 370), new Scalar(255,0,0), 1, 1);
 
-        paste(rot, cuttedPic,100,400);
+        Imgproc.cvtColor(plot, plot, Imgproc.COLOR_HSV2BGR,3);
+        Imgproc.cvtColor(plot, plot, Imgproc.COLOR_BGR2RGBA,4);
+        paste(rot, plot,100,400);
 
+        final Mat matouttemp = cuttedHSV;
+        final int flen = len;
+        final int fmin = min;
+        final int fmax = max;
         textView.post(new Runnable() {
+            @SuppressLint("SetTextI18n")
             public void run() {
-                textView.setText("h:" + cuttedPic.rows() + " r:" + cuttedPic.cols());
+                textView.setText("max:"+fmax+"min:"+fmin+"len:"+flen + ", " + matouttemp.toString() + "r:" + matouttemp.rows() + " c:" + matouttemp.cols());
             }
         });
 
