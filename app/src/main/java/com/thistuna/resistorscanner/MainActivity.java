@@ -24,6 +24,8 @@ import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.Arrays;
+
 import static org.opencv.imgproc.Imgproc.COLOR_BGR2HSV;
 import static org.opencv.imgproc.Imgproc.COLOR_HSV2BGR;
 import static org.opencv.imgproc.Imgproc.cvtColor;
@@ -110,6 +112,40 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         paste(dst, src, x, y, src.cols(), src.rows());
     }
 
+    int ColorHSV[][] = {
+            {0,0,42}, // 黒
+            {14,173,134}, // 茶
+            {248,227,237}, // 赤
+            {11,219,241}, // 橙
+            {43,219,240}, // 黄
+            {85,255,192}, // 緑
+            {147,255,192}, // 青
+            {45,125,161}, // 紫
+            {153,8,166}, // 灰
+            {0,0,239} // 白
+    };
+
+    private int decodeColorCode(int H, int S, int V){
+        double distance = 114514;
+        int minnum = 0;
+        for(int i=0; i<10; i++){
+            int Hd = H-ColorHSV[i][0];
+            if(Hd < 0) Hd = -Hd;
+            if(Hd >= 128) Hd = 256-Hd;
+            int Sd = S-ColorHSV[i][1];
+            if(Sd < 0) Sd = -Sd;
+            int Vd = V-ColorHSV[i][2];
+            if(Vd < 0) Vd = -Vd;
+            int localDistance = Hd*Hd;// + Sd*Sd + Vd*Vd;
+            if(localDistance < distance){
+                minnum = i;
+                distance = localDistance;
+            }
+        }
+
+        return minnum;
+    }
+
     @Override
     public Mat onCameraFrame(Mat inputFrame) {
         // ここで何らかの画像処理を行う
@@ -162,6 +198,9 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         double[] meanS = new double[5];
         double[] meanV = new double[5];
         Mat plot = Mat.zeros(cuttedHSV.rows(), cuttedHSV.cols(), CvType.CV_8UC3);
+        int[][] meanAddH = new int[5][size];
+        int[][] meanAddS = new int[5][size];
+        int[][] meanAddV = new int[5][size];
         for(int i=0; i<plot.rows(); ++i){
             for(int j=0; j<plot.cols(); ++j){
                 int[] temp = new int[1];
@@ -203,21 +242,76 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
                         byte[] getTempHSV = new byte[3];
                         cuttedHSV.get(i,j,getTempHSV);
-                        meanH[k] += getTempHSV[0];
-                        meanS[k] += getTempHSV[1];
-                        meanV[k] += getTempHSV[2];
+
+                        meanAddH[k][0]++;
+                        meanAddS[k][0]++;
+                        meanAddV[k][0]++;
+
+                        meanAddH[k][meanAddH[k][0]] = getTempHSV[0];
+                        meanAddS[k][meanAddS[k][0]] = getTempHSV[1];
+                        meanAddV[k][meanAddV[k][0]] = getTempHSV[2];
+
+
                     }
                 }
                 //plot.put(i,j,puttemp);
             }
         }
+
+        for(int i=0; i<5; i++){
+            double meanSubH[] = new double[meanAddH[i][0]];
+            double meanSubS[] = new double[meanAddS[i][0]];
+            double meanSubV[] = new double[meanAddV[i][0]];
+
+            for(int j=0; j<meanAddH[i][0]; ++j){
+                meanSubH[j] = meanAddH[i][j+1];
+                meanSubS[j] = meanAddS[i][j+1];
+                meanSubV[j] = meanAddV[i][j+1];
+            }
+
+            Arrays.sort(meanSubH);
+            Arrays.sort(meanSubS);
+            Arrays.sort(meanSubV);
+
+            meanH[i] = meanSubH[meanSubH.length/2];
+            meanS[i] = meanSubS[meanSubS.length/2];
+            meanV[i] = meanSubV[meanSubV.length/2];
+        }
+
         int bg=0;
         for(int i=0; i<5; ++i){
             CenterOfGravityX[i] /= count[i];
-            meanH[i] /= count[i];
-            meanS[i] /= count[i];
-            meanV[i] /= count[i];
+            CenterOfGravityY[i] /= count[i];
+//            meanH[i] /= count[i];
+//            meanS[i] /= count[i];
+//            meanV[i] /= count[i];
             if(count[bg] < count[i]) bg = i;
+        }
+
+        double[] unti = CenterOfGravityX.clone();
+        unti[bg] = 114514;
+        int[] ColorLine = new int[5];
+        for(int i=0; i<5; ++i){
+            int localmin = 0;
+            for(int j=0; j<5; ++j){
+                if(unti[localmin] > unti[j]){
+                    localmin = j;
+                }
+            }
+            ColorLine[i] = localmin;
+            unti[localmin] = 114154+1+i;
+        }
+
+        int[] colors = new int[4];
+        colors[0] = decodeColorCode((int)meanH[ColorLine[0]], (int)meanS[ColorLine[0]], (int)meanV[ColorLine[0]]);
+        colors[1] = decodeColorCode((int)meanH[ColorLine[1]], (int)meanS[ColorLine[1]], (int)meanV[ColorLine[1]]);
+        colors[2] = decodeColorCode((int)meanH[ColorLine[2]], (int)meanS[ColorLine[2]], (int)meanV[ColorLine[2]]);
+        colors[3] = decodeColorCode((int)meanH[ColorLine[3]], (int)meanS[ColorLine[3]], (int)meanV[ColorLine[3]]);
+
+        String resultColor = Codecolor[colors[0]]+Codecolor[colors[1]]+Codecolor[colors[2]]+Codecolor[colors[3]];
+        int resultReg = colors[0]*10 + colors[1];
+        for(int i=0; i<colors[3]; ++i){
+            resultReg *= 10;
         }
 
         for(int i=0; i<plot.rows(); ++i) {
@@ -252,10 +346,15 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         final int flen = len;
         final int fmin = min;
         final int fmax = max;
+        //final String res = resultColor + ColorLine[0] + ColorLine[1] + ColorLine[2] + ColorLine[3];
+
+        final String resultString = resultColor + resultReg + "Ω";
+
         textView.post(new Runnable() {
             @SuppressLint("SetTextI18n")
             public void run() {
-                textView.setText("max:"+fmax+"min:"+fmin+"len:"+flen + ", " + matouttemp.toString() + "r:" + matouttemp.rows() + " c:" + matouttemp.cols());
+                //textView.setText(res + "max:"+fmax+"min:"+fmin+"len:"+flen + ", " + matouttemp.toString() + "r:" + matouttemp.rows() + " c:" + matouttemp.cols());
+                textView.setText(resultString);
             }
         });
 
