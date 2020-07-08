@@ -191,16 +191,16 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         int len = -1;
         int min = 100;
         int max = -1;
-        int[] count = new int[5];
-        double[] CenterOfGravityX = new double[5];
-        double[] CenterOfGravityY = new double[5];
-        double[] meanH = new double[5];
-        double[] meanS = new double[5];
-        double[] meanV = new double[5];
+        int[] count = new int[MAX_CLUSTERS];
+        double[] CenterOfGravityX = new double[MAX_CLUSTERS];
+        double[] CenterOfGravityY = new double[MAX_CLUSTERS];
+        double[] meanH = new double[MAX_CLUSTERS];
+        double[] meanS = new double[MAX_CLUSTERS];
+        double[] meanV = new double[MAX_CLUSTERS];
         Mat plot = Mat.zeros(cuttedHSV.rows(), cuttedHSV.cols(), CvType.CV_8UC3);
-        int[][] meanAddH = new int[5][size];
-        int[][] meanAddS = new int[5][size];
-        int[][] meanAddV = new int[5][size];
+        int[][] meanAddH = new int[MAX_CLUSTERS][size];
+        int[][] meanAddS = new int[MAX_CLUSTERS][size];
+        int[][] meanAddV = new int[MAX_CLUSTERS][size];
         for(int i=0; i<plot.rows(); ++i){
             for(int j=0; j<plot.cols(); ++j){
                 int[] temp = new int[1];
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                     puttemp[1] = (byte)255;
                     puttemp[2] = (byte)255;
                 }*/
-                for(int k = 0; k<5; ++k){
+                for(int k = 0; k<MAX_CLUSTERS; ++k){
                     if(temp[0] == k){
                         count[k]++;
                         CenterOfGravityX[k] += j;
