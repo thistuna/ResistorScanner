@@ -205,10 +205,10 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             for(int j=0; j<plot.cols(); ++j){
                 int[] temp = new int[1];
                 byte[] puttemp = new byte[3];
-                len = reshapeClusters.get(i,j).length;
+//                len = reshapeClusters.get(i,j).length;
                 reshapeClusters.get(i,j,temp);
-                if(temp[0] > max) max = temp[0];
-                if(temp[0] < min) min = temp[0];
+//                if(temp[0] > max) max = temp[0];
+//                if(temp[0] < min) min = temp[0];
 /*                if(temp[0] == 0) {
                     puttemp[0] = 0;
                     puttemp[1] = 0;
@@ -342,10 +342,10 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         Imgproc.cvtColor(plot, plot, Imgproc.COLOR_BGR2RGBA,4);
         paste(rot, plot,100,400);
 
-        final Mat matouttemp = cuttedHSV;
-        final int flen = len;
-        final int fmin = min;
-        final int fmax = max;
+//        final Mat matouttemp = cuttedHSV;
+//        final int flen = len;
+//        final int fmin = min;
+//        final int fmax = max;
         //final String res = resultColor + ColorLine[0] + ColorLine[1] + ColorLine[2] + ColorLine[3];
 
         final String resultString = resultColor + "\n" + resultReg + "Ω";
