@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     };
 
     private int decodeColorCode(int H, int S, int V){
-        double distance = 114514;
+        double distance = 1145141919;
         int minnum = 0;
         for(int i=0; i<10; i++){
             int Hd = H-ColorHSV[i][0];
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             if(Sd < 0) Sd = -Sd;
             int Vd = V-ColorHSV[i][2];
             if(Vd < 0) Vd = -Vd;
-            int localDistance = Hd*Hd;// + Sd*Sd + Vd*Vd;
+            double localDistance = Hd*Hd*50 + Sd/50 + Vd/50;
             if(localDistance < distance){
                 minnum = i;
                 distance = localDistance;
@@ -310,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
         String resultColor = Codecolor[colors[0]]+Codecolor[colors[1]]+Codecolor[colors[2]]+Codecolor[colors[3]];
         int resultReg = colors[0]*10 + colors[1];
-        for(int i=0; i<colors[3]; ++i){
+        for(int i=0; i<colors[2]; ++i){
             resultReg *= 10;
         }
 
@@ -348,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         final int fmax = max;
         //final String res = resultColor + ColorLine[0] + ColorLine[1] + ColorLine[2] + ColorLine[3];
 
-        final String resultString = resultColor + resultReg + "Ω";
+        final String resultString = resultColor + "\n" + resultReg + "Ω";
 
         textView.post(new Runnable() {
             @SuppressLint("SetTextI18n")
