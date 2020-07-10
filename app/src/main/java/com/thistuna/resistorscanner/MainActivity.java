@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             }
         }
 
-        for(int i=0; i<5; i++){
+        for(int i=0; i<MAX_CLUSTERS; i++){
             double meanSubH[] = new double[meanAddH[i][0]];
             double meanSubS[] = new double[meanAddS[i][0]];
             double meanSubV[] = new double[meanAddV[i][0]];
@@ -279,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         }
 
         int bg=0;
-        for(int i=0; i<5; ++i){
+        for(int i=0; i<MAX_CLUSTERS; ++i){
             CenterOfGravityX[i] /= count[i];
             CenterOfGravityY[i] /= count[i];
 //            meanH[i] /= count[i];
@@ -290,10 +290,10 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
         double[] unti = CenterOfGravityX.clone();
         unti[bg] = 114514;
-        int[] ColorLine = new int[5];
-        for(int i=0; i<5; ++i){
+        int[] ColorLine = new int[MAX_CLUSTERS];
+        for(int i=0; i<MAX_CLUSTERS; ++i){
             int localmin = 0;
-            for(int j=0; j<5; ++j){
+            for(int j=0; j<MAX_CLUSTERS; ++j){
                 if(unti[localmin] > unti[j]){
                     localmin = j;
                 }
